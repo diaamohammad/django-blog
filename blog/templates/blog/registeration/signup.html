@@ -1,0 +1,31 @@
+<h1>registeration</h1>
+
+
+<form method="post" action="{% url 'blog:signup' %}">
+    {% csrf_token %}
+    <div>
+        <label for="{{ form.username.id_for_label }}">username:</label>
+        {{ form.username }}
+    </div>
+
+    <div>
+        <label for="{{ form.password1.id_for_label }}">password:</label>
+        {{ form.password1 }}
+    </div>
+
+    <div>
+        <label for="{{ form.password2.id_for_label }}">confirm password:</label>
+        {{ form.password2 }}
+    </div>
+
+    <button type="submit">register</button>
+</form>
+{% if form.errors %}
+    <ul style="color: red;">
+        {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+                <li>{{ field|capfirst }}: {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+{% endif %}

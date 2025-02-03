@@ -1,32 +1,42 @@
-from django.shortcuts import render,get_object_or_404
+from django.shortcuts import render,get_object_or_404,redirect
 from .models import Post,Comment
 from django.http import Http404
 from django.core.paginator import Paginator,PageNotAnInteger,EmptyPage
 from django.views.generic import ListView,CreateView
 from .forms import CommentForm
 from django.views.decorators.http import require_POST
+from django.contrib.auth.forms import UserCreationForm
+from django.urls import reverse_lazy
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-#def post_list(request):
-   # post_list = Post.objects.all()
-   # paginator = Paginator(post_list,2)
-   # page_number = request.GET.get('page',1)
+class SiginUpView(CreateView):
+    
+    form_class = UserCreationForm
+    success_url = reverse_lazy('blog:login')
+    template_name = 'blog/registeration/signup.html'
 
-   # try:
-     #   posts = paginator.page(page_number)
-   # except PageNotAnInteger:
-    #    posts = paginator.page(1)
-    #except EmptyPage:
-        #posts = paginator.page(page_number.num_pages)
-    #return render(request,'blog/post/list.html',{'posts':posts})
+    def form_valid(self, form):
+        form.save()
 
-class PostListView(ListView):
+        return redirect(self.success_url)
+    
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
+
+class PostListView(LoginRequiredMixin, ListView):
 
     model = Post
     context_object_name = 'posts'
     paginate_by = 2
     template_name = 'blog/post/list.html'
-    
+    login_url = 'login/'
+    redirect_field_name = 'next'
+
+
+@login_required(login_url='login/')   
 def post_detial(request,year,month,day,post):
 
     post = get_object_or_404(Post, status=Post.Status.PUBLISHED,
@@ -40,6 +50,8 @@ def post_detial(request,year,month,day,post):
     form = CommentForm()
     return render(request,'blog/post/detial.html',{'post':post,'comments':comments, 'form':form})
 
+
+@login_required(login_url='login/')
 @require_POST
 def comment_post(request,post_id):
 
