@@ -25,6 +25,9 @@ class SiginUpView(CreateView):
     
     def form_invalid(self, form):
         return self.render_to_response(self.get_context_data(form=form))
+    
+def profile_view(request):
+    return render(request,'profile.html')
 
 class PostListView(LoginRequiredMixin, ListView):
 
